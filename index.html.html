@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Camp — Group 1 Schedule</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.09);
+    --border-med: rgba(0,0,0,0.15);
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-tertiary: #9b9b96;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+
+    --fixed-bg: #f4f3f0;
+    --fixed-text: #4a4a47;
+    --swim-bg: #e6f1fb;
+    --swim-text: #0c447c;
+    --chapel-bg: #eeedfe;
+    --chapel-text: #3c3489;
+    --change-bg: #f1efe8;
+    --change-text: #5f5e5a;
+    --derby-bg: #faeeda;
+    --derby-text: #633806;
+    --water-bg: #e1f5ee;
+    --water-text: #085041;
+    --activity-bg: #eaf3de;
+    --activity-text: #27500a;
+    --open-bg: #faece7;
+    --open-text: #993c1d;
+    --open-border: #d85a30;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171500;
+      --surface: #1e1e1c;
+      --border: rgba(255,255,255,0.09);
+      --border-med: rgba(255,255,255,0.15);
+      --text-primary: #f0efe8;
+      --text-secondary: #a0a09b;
+      --text-tertiary: #6a6a66;
+
+      --fixed-bg: #2a2a27;
+      --fixed-text: #c5c5c0;
+      --swim-bg: #0c447c;
+      --swim-text: #b5d4f4;
+      --chapel-bg: #3c3489;
+      --chapel-text: #cecbf6;
+      --change-bg: #2e2e2b;
+      --change-text: #b0b0ab;
+      --derby-bg: #633806;
+      --derby-text: #fac775;
+      --water-bg: #085041;
+      --water-text: #9fe1cb;
+      --activity-bg: #27500a;
+      --activity-text: #c0dd97;
+      --open-bg: #4a1b0c;
+      --open-text: #f5c4b3;
+      --open-border: #f0997b;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 16px; font-weight: 500; color: var(--text-primary); letter-spacing: -0.3px; }
+  .logo span { color: var(--text-secondary); font-weight: 400; }
+
+  .clock-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  #clock {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  #clock-date {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  nav::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active {
+    color: var(--text-primary);
+    font-weight: 500;
+    border-bottom-color: #378ADD;
+  }
+
+  .day-panel { display: none; padding: 24px; max-width: 780px; margin: 0 auto; }
+  .day-panel.active { display: block; }
+
+  .now-bar {
+    background: var(--surface);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .now-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #378ADD;
+    flex-shrink: 0;
+  }
+  .now-dot.pulse {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .now-label { font-size: 12px; color: var(--text-tertiary); margin-right: 4px; }
+  .now-activity { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .now-time { font-size: 13px; color: var(--text-secondary); margin-left: auto; }
+
+  .progress-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #378ADD;
+    border-radius: 2px;
+    transition: width 10s linear;
+  }
+
+  .schedule-list { display: flex; flex-direction: column; gap: 3px; }
+
+  .block {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    transition: opacity 0.2s;
+  }
+  .block.past { opacity: 0.45; }
+  .block.current {
+    outline: 2px solid #378ADD;
+    outline-offset: -1px;
+  }
+
+  .block-time {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    min-width: 100px;
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .block-info { flex: 1; }
+  .block-name { font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .block-note { font-size: 12px; margin-top: 2px; opacity: 0.75; }
+
+  .t-fixed    { background: var(--fixed-bg); }
+  .t-fixed    .block-name { color: var(--fixed-text); }
+  .t-fixed    .block-note { color: var(--fixed-text); }
+
+  .t-swim     { background: var(--swim-bg); }
+  .t-swim     .block-name, .t-swim .block-note { color: var(--swim-text); }
+
+  .t-chapel   { background: var(--chapel-bg); }
+  .t-chapel   .block-name, .t-chapel .block-note { color: var(--chapel-text); }
+
+  .t-change   { background: var(--change-bg); }
+  .t-change   .block-name, .t-change .block-note { color: var(--change-text); }
+
+  .t-derby    { background: var(--derby-bg); }
+  .t-derby    .block-name, .t-derby .block-note { color: var(--derby-text); }
+
+  .t-water    { background: var(--water-bg); }
+  .t-water    .block-name, .t-water .block-note { color: var(--water-text); }
+
+  .t-activity { background: var(--activity-bg); }
+  .t-activity .block-name, .t-activity .block-note { color: var(--activity-text); }
+
+  .t-open {
+    background: var(--open-bg);
+    border: 1px dashed var(--open-border);
+  }
+  .t-open .block-name, .t-open .block-note { color: var(--open-text); }
+  .t-open .block-name { font-style: italic; font-weight: 400; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border);
+  }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .section-divider {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding: 12px 4px 6px;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 0 16px; }
+    nav { padding: 0 12px; }
+    .day-panel { padding: 16px; }
+    .block-time { min-width: 80px; font-size: 11px; }
+    #clock { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">Summer Camp <span>· Group 1</span></div>
+  </div>
+  <div class="clock-wrap">
+    <div id="clock">--:-- --</div>
+    <div id="clock-date"></div>
+  </div>
+</header>
+
+<nav id="day-tabs">
+  <button class="tab active" data-day="monday">Monday · Jun 22</button>
+  <button class="tab" data-day="tuesday">Tuesday · Jun 23</button>
+  <button class="tab" data-day="wednesday">Wednesday · Jun 24</button>
+  <button class="tab" data-day="thursday">Thursday · Jun 25</button>
+  <button class="tab" data-day="friday">Friday · Jun 26</button>
+</nav>
+
+<div id="monday" class="day-panel active">
+  <div class="now-bar" id="now-monday">
+    <div class="now-dot pulse"></div>
+    <span class="now-label">Now:</span>
+    <span class="now-activity" id="now-act-monday">—</span>
+    <span class="now-time" id="now-time-monday"></span>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:#378ADD"></div>Swim</div>
+    <div class="leg"><div class="leg-dot" style="background:#888780"></div>Change</div>
+    <div class="leg"><div class="leg-dot" style="background:#7F77DD"></div>Chapel/church</div>
+    <div class="leg"><div class="leg-dot" style="background:#BA7517"></div>Derby cars</div>
+    <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>Water gun war</div>
+    <div class="leg"><div class="leg-dot" style="background:#639922"></div>Activity</div>
+    <div class="leg"><div class="leg-dot" style="background:#D85A30; border-radius:2px;"></div>Open for ideas</div>
+  </div>
+  <div class="schedule-list" id="list-monday">
+    <div class="block t-fixed"   data-start="07:00" data-end="09:00"><div class="block-time">7:00 – 9:00 AM</div><div class="block-info"><div class="block-name">Registration &amp; dorm set-up</div></div></div>
+    <div class="block t-fixed"   data-start="09:00" data-end="10:00"><div class="block-time">9:00 – 10:00 AM</div><div class="block-info"><div class="block-name">Camp welcome</div></div></div>
+    <div class="block t-fixed"   data-start="10:00" data-end="11:00"><div class="block-time">10:00 – 11:00 AM</div><div class="block-info"><div class="block-name">Get to know you time</div></div></div>
+    <div class="block t-chapel"  data-start="11:00" data-end="13:15"><div class="block-time">11:00 AM</div><div class="block-info"><div class="block-name">Chapel</div><div class="block-note">End time varies · runs into lunch window</div></div></div>
+    <div class="block t-fixed"   data-start="11:30" data-end="13:15"><div class="block-time">Chapel end – 1:15 PM</div><div class="block-info"><div class="block-name">Lunch</div></div></div>
+    <div class="block t-change"  data-start="13:15" data-end="13:30"><div class="block-time">1:15 – 1:30 PM</div><div class="block-info"><div class="block-name">Change into swim clothes</div></div></div>
+    <div class="block t-swim"    data-start="13:30" data-end="14:15"><div class="block-time">1:30 – 2:15 PM</div><div class="block-info"><div class="block-name">Swim</div></div></div>
+    <div class="block t-change"  data-start="14:15" data-end="14:30"><div class="block-time">2:15 – 2:30 PM</div><div class="block-info"><div class="block-name">Change out of swim clothes</div></div></div>
+    <div class="block t-derby"   data-start="14:30" data-end="15:15"><div class="block-time">2:30 – 3:15 PM</div><div class="block-info"><div class="block-name">Derby car decorating</div><div class="block-note">~45 min · first session</div></div></div>
+    <div class="block t-open"    data-start="15:15" data-end="16:30"><div class="block-time">3:15 – 4:30 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-change"  data-start="16:30" data-end="16:50"><div class="block-time">4:30 – 4:50 PM</div><div class="block-info"><div class="block-name">Change for tabernacle</div></div></div>
+    <div class="block t-open"    data-start="16:50" data-end="17:30"><div class="block-time">4:50 – 5:30 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-fixed"   data-start="17:30" data-end="18:30"><div class="block-time">5:30 PM</div><div class="block-info"><div class="block-name">Supper</div></div></div>
+    <div class="block t-chapel"  data-start="18:30" data-end="19:00"><div class="block-time">6:30 PM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel"  data-start="19:00" data-end="21:45"><div class="block-time">7:00 PM</div><div class="block-info"><div class="block-name">Church</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"   data-start="21:45" data-end="22:00"><div class="block-time">Church end – 9:45 PM</div><div class="block-info"><div class="block-name">Gym party</div></div></div>
+    <div class="block t-fixed"   data-start="22:00" data-end="22:30"><div class="block-time">10:00 – 10:30 PM</div><div class="block-info"><div class="block-name">Devotion</div></div></div>
+    <div class="block t-fixed"   data-start="22:30" data-end="23:59"><div class="block-time">10:30 PM</div><div class="block-info"><div class="block-name">Lights out</div></div></div>
+  </div>
+</div>
+
+<div id="tuesday" class="day-panel">
+  <div class="now-bar" id="now-tuesday">
+    <div class="now-dot pulse"></div>
+    <span class="now-label">Now:</span>
+    <span class="now-activity" id="now-act-tuesday">—</span>
+    <span class="now-time" id="now-time-tuesday"></span>
+  </div>
+  <div class="schedule-list" id="list-tuesday">
+    <div class="block t-fixed"  data-start="08:00" data-end="08:30"><div class="block-time">8:00 AM</div><div class="block-info"><div class="block-name">Wake up</div></div></div>
+    <div class="block t-fixed"  data-start="08:30" data-end="09:00"><div class="block-time">8:30 AM</div><div class="block-info"><div class="block-name">Breakfast</div></div></div>
+    <div class="block t-fixed"  data-start="09:00" data-end="10:00"><div class="block-time">9:00 – 10:00 AM</div><div class="block-info"><div class="block-name">Chores</div></div></div>
+    <div class="block t-chapel" data-start="10:00" data-end="11:00"><div class="block-time">10:00 – 11:00 AM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel" data-start="11:00" data-end="13:15"><div class="block-time">11:00 AM</div><div class="block-info"><div class="block-name">Chapel</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"  data-start="11:30" data-end="13:15"><div class="block-time">Chapel end – 1:15 PM</div><div class="block-info"><div class="block-name">Lunch</div></div></div>
+    <div class="block t-change" data-start="13:15" data-end="13:30"><div class="block-time">1:15 – 1:30 PM</div><div class="block-info"><div class="block-name">Change into swim clothes</div></div></div>
+    <div class="block t-swim"   data-start="13:30" data-end="14:15"><div class="block-time">1:30 – 2:15 PM</div><div class="block-info"><div class="block-name">Swim</div></div></div>
+    <div class="block t-change" data-start="14:15" data-end="14:30"><div class="block-time">2:15 – 2:30 PM</div><div class="block-info"><div class="block-name">Change out of swim clothes</div></div></div>
+    <div class="block t-derby"  data-start="14:30" data-end="15:30"><div class="block-time">2:30 – 3:30 PM</div><div class="block-info"><div class="block-name">Derby car decorating</div><div class="block-note">~60 min · second &amp; final session</div></div></div>
+    <div class="block t-open"   data-start="15:30" data-end="16:50"><div class="block-time">3:30 – 4:50 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-change" data-start="16:50" data-end="17:10"><div class="block-time">4:50 – 5:10 PM</div><div class="block-info"><div class="block-name">Change for tabernacle</div></div></div>
+    <div class="block t-open"   data-start="17:10" data-end="17:30"><div class="block-time">5:10 – 5:30 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-fixed"  data-start="17:30" data-end="18:30"><div class="block-time">5:30 PM</div><div class="block-info"><div class="block-name">Supper</div></div></div>
+    <div class="block t-chapel" data-start="18:30" data-end="19:00"><div class="block-time">6:30 PM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel" data-start="19:00" data-end="22:00"><div class="block-time">7:00 PM</div><div class="block-info"><div class="block-name">Church</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"  data-start="22:00" data-end="22:30"><div class="block-time">Church end – 10:00 PM</div><div class="block-info"><div class="block-name">After church activity</div><div class="block-note">Swim (group of the day) · gym · or field</div></div></div>
+    <div class="block t-fixed"  data-start="22:00" data-end="22:30"><div class="block-time">10:00 – 10:30 PM</div><div class="block-info"><div class="block-name">Devotion</div></div></div>
+    <div class="block t-fixed"  data-start="22:30" data-end="23:59"><div class="block-time">10:30 PM</div><div class="block-info"><div class="block-name">Lights out</div></div></div>
+  </div>
+</div>
+
+<div id="wednesday" class="day-panel">
+  <div class="now-bar" id="now-wednesday">
+    <div class="now-dot pulse"></div>
+    <span class="now-label">Now:</span>
+    <span class="now-activity" id="now-act-wednesday">—</span>
+    <span class="now-time" id="now-time-wednesday"></span>
+  </div>
+  <div class="schedule-list" id="list-wednesday">
+    <div class="block t-fixed"    data-start="08:00" data-end="08:30"><div class="block-time">8:00 AM</div><div class="block-info"><div class="block-name">Wake up</div></div></div>
+    <div class="block t-fixed"    data-start="08:30" data-end="09:00"><div class="block-time">8:30 AM</div><div class="block-info"><div class="block-name">Breakfast</div></div></div>
+    <div class="block t-fixed"    data-start="09:00" data-end="10:00"><div class="block-time">9:00 – 10:00 AM</div><div class="block-info"><div class="block-name">Chores</div></div></div>
+    <div class="block t-chapel"   data-start="10:00" data-end="11:00"><div class="block-time">10:00 – 11:00 AM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel"   data-start="11:00" data-end="13:15"><div class="block-time">11:00 AM</div><div class="block-info"><div class="block-name">Chapel</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"    data-start="11:30" data-end="13:15"><div class="block-time">Chapel end – 1:15 PM</div><div class="block-info"><div class="block-name">Lunch</div></div></div>
+    <div class="block t-change"   data-start="13:15" data-end="13:30"><div class="block-time">1:15 – 1:30 PM</div><div class="block-info"><div class="block-name">Change into swim clothes</div></div></div>
+    <div class="block t-swim"     data-start="13:30" data-end="14:15"><div class="block-time">1:30 – 2:15 PM</div><div class="block-info"><div class="block-name">Swim</div></div></div>
+    <div class="block t-water"    data-start="14:15" data-end="15:15"><div class="block-time">2:15 – 3:15 PM</div><div class="block-info"><div class="block-name">Water gun war</div><div class="block-note">Straight from pool · no change needed</div></div></div>
+    <div class="block t-change"   data-start="15:15" data-end="15:30"><div class="block-time">3:15 – 3:30 PM</div><div class="block-info"><div class="block-name">Change out of swim clothes</div></div></div>
+    <div class="block t-activity" data-start="15:30" data-end="16:30"><div class="block-time">3:30 – 4:30 PM</div><div class="block-info"><div class="block-name">Derby car races</div><div class="block-note">~60 min</div></div></div>
+    <div class="block t-change"   data-start="16:30" data-end="16:50"><div class="block-time">4:30 – 4:50 PM</div><div class="block-info"><div class="block-name">Change for tabernacle</div></div></div>
+    <div class="block t-activity" data-start="16:50" data-end="17:30"><div class="block-time">4:50 – 5:30 PM</div><div class="block-info"><div class="block-name">Gym time</div></div></div>
+    <div class="block t-fixed"    data-start="17:30" data-end="18:30"><div class="block-time">5:30 PM</div><div class="block-info"><div class="block-name">Supper</div></div></div>
+    <div class="block t-chapel"   data-start="18:30" data-end="19:00"><div class="block-time">6:30 PM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel"   data-start="19:00" data-end="22:00"><div class="block-time">7:00 PM</div><div class="block-info"><div class="block-name">Church</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"    data-start="22:00" data-end="22:30"><div class="block-time">Church end – 10:00 PM</div><div class="block-info"><div class="block-name">After church activity</div><div class="block-note">Swim (group of the day) · gym · or field</div></div></div>
+    <div class="block t-fixed"    data-start="22:00" data-end="22:30"><div class="block-time">10:00 – 10:30 PM</div><div class="block-info"><div class="block-name">Devotion</div></div></div>
+    <div class="block t-fixed"    data-start="22:30" data-end="23:59"><div class="block-time">10:30 PM</div><div class="block-info"><div class="block-name">Lights out</div></div></div>
+  </div>
+</div>
+
+<div id="thursday" class="day-panel">
+  <div class="now-bar" id="now-thursday">
+    <div class="now-dot pulse"></div>
+    <span class="now-label">Now:</span>
+    <span class="now-activity" id="now-act-thursday">—</span>
+    <span class="now-time" id="now-time-thursday"></span>
+  </div>
+  <div class="schedule-list" id="list-thursday">
+    <div class="block t-fixed"  data-start="08:00" data-end="08:30"><div class="block-time">8:00 AM</div><div class="block-info"><div class="block-name">Wake up</div></div></div>
+    <div class="block t-fixed"  data-start="08:30" data-end="09:00"><div class="block-time">8:30 AM</div><div class="block-info"><div class="block-name">Breakfast</div></div></div>
+    <div class="block t-fixed"  data-start="09:00" data-end="10:00"><div class="block-time">9:00 – 10:00 AM</div><div class="block-info"><div class="block-name">Chores</div></div></div>
+    <div class="block t-chapel" data-start="10:00" data-end="11:00"><div class="block-time">10:00 – 11:00 AM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel" data-start="11:00" data-end="13:15"><div class="block-time">11:00 AM</div><div class="block-info"><div class="block-name">Chapel</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"  data-start="11:30" data-end="13:15"><div class="block-time">Chapel end – 1:15 PM</div><div class="block-info"><div class="block-name">Lunch</div></div></div>
+    <div class="block t-change" data-start="13:15" data-end="13:30"><div class="block-time">1:15 – 1:30 PM</div><div class="block-info"><div class="block-name">Change into swim clothes</div></div></div>
+    <div class="block t-swim"   data-start="13:30" data-end="14:15"><div class="block-time">1:30 – 2:15 PM</div><div class="block-info"><div class="block-name">Swim</div></div></div>
+    <div class="block t-change" data-start="14:15" data-end="14:30"><div class="block-time">2:15 – 2:30 PM</div><div class="block-info"><div class="block-name">Change out of swim clothes</div></div></div>
+    <div class="block t-open"   data-start="14:30" data-end="16:30"><div class="block-time">2:30 – 4:30 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-change" data-start="16:30" data-end="16:50"><div class="block-time">4:30 – 4:50 PM</div><div class="block-info"><div class="block-name">Change for tabernacle</div></div></div>
+    <div class="block t-open"   data-start="16:50" data-end="17:30"><div class="block-time">4:50 – 5:30 PM</div><div class="block-info"><div class="block-name">Open for ideas</div></div></div>
+    <div class="block t-fixed"  data-start="17:30" data-end="18:30"><div class="block-time">5:30 PM</div><div class="block-info"><div class="block-name">Supper</div></div></div>
+    <div class="block t-chapel" data-start="18:30" data-end="19:00"><div class="block-time">6:30 PM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel" data-start="19:00" data-end="22:00"><div class="block-time">7:00 PM</div><div class="block-info"><div class="block-name">Church</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"  data-start="22:00" data-end="22:30"><div class="block-time">Church end – 10:00 PM</div><div class="block-info"><div class="block-name">After church activity</div><div class="block-note">Swim (group of the day) · gym · or field</div></div></div>
+    <div class="block t-fixed"  data-start="22:00" data-end="22:30"><div class="block-time">10:00 – 10:30 PM</div><div class="block-info"><div class="block-name">Devotion</div></div></div>
+    <div class="block t-fixed"  data-start="22:30" data-end="23:59"><div class="block-time">10:30 PM</div><div class="block-info"><div class="block-name">Lights out</div></div></div>
+  </div>
+</div>
+
+<div id="friday" class="day-panel">
+  <div class="now-bar" id="now-friday">
+    <div class="now-dot pulse"></div>
+    <span class="now-label">Now:</span>
+    <span class="now-activity" id="now-act-friday">—</span>
+    <span class="now-time" id="now-time-friday"></span>
+  </div>
+  <div class="schedule-list" id="list-friday">
+    <div class="block t-fixed"  data-start="08:00" data-end="08:30"><div class="block-time">8:00 AM</div><div class="block-info"><div class="block-name">Wake up</div></div></div>
+    <div class="block t-fixed"  data-start="08:30" data-end="09:00"><div class="block-time">8:30 AM</div><div class="block-info"><div class="block-name">Breakfast</div></div></div>
+    <div class="block t-fixed"  data-start="09:00" data-end="10:00"><div class="block-time">9:00 – 10:00 AM</div><div class="block-info"><div class="block-name">Pack &amp; chores</div></div></div>
+    <div class="block t-chapel" data-start="10:00" data-end="11:00"><div class="block-time">10:00 – 11:00 AM</div><div class="block-info"><div class="block-name">Tabernacle</div></div></div>
+    <div class="block t-chapel" data-start="11:00" data-end="13:00"><div class="block-time">11:00 AM</div><div class="block-info"><div class="block-name">Chapel</div><div class="block-note">End time varies</div></div></div>
+    <div class="block t-fixed"  data-start="11:30" data-end="13:00"><div class="block-time">Chapel end – 1:00 PM</div><div class="block-info"><div class="block-name">Lunch</div></div></div>
+    <div class="block t-fixed"  data-start="13:00" data-end="14:30"><div class="block-time">1:00 PM</div><div class="block-info"><div class="block-name">Awards</div></div></div>
+    <div class="block t-fixed"  data-start="14:30" data-end="23:59"><div class="block-time">After awards</div><div class="block-info"><div class="block-name">Checkout</div></div></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.day-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.day).classList.add('active');
+    });
+  });
+
+  function toMinutes(str) {
+    const [h, m] = str.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  function updateClock() {
+    const now = new Date();
+    let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    const mm = String(m).padStart(2, '0');
+    const ss = String(s).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h12}:${mm}:${ss} ${ampm}`;
+
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('clock-date').textContent =
+      `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+
+    const nowMins = h * 60 + m;
+    const campDates = {
+      monday:    '2026-06-22',
+      tuesday:   '2026-06-23',
+      wednesday: '2026-06-24',
+      thursday:  '2026-06-25',
+      friday:    '2026-06-26'
+    };
+    const pad2 = n => String(n).padStart(2, '0');
+    const todayStr = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+
+    Object.keys(campDates).forEach(day => {
+      const isToday = campDates[day] === todayStr;
+      const blocks = document.querySelectorAll(`#list-${day} .block`);
+      const actEl = document.getElementById(`now-act-${day}`);
+      const timeEl = document.getElementById(`now-time-${day}`);
+      let currentBlock = null;
+
+      blocks.forEach(block => {
+        block.classList.remove('past', 'current');
+        if (!isToday) return;
+        const start = toMinutes(block.dataset.start);
+        const end = toMinutes(block.dataset.end);
+        if (nowMins >= end) {
+          block.classList.add('past');
+        } else if (nowMins >= start && nowMins < end) {
+          block.classList.add('current');
+          currentBlock = block;
+        }
+      });
+
+      if (!isToday) {
+        const campDate = new Date(campDates[day] + 'T00:00:00');
+        const isPast = now > new Date(campDates[day] + 'T23:59:59');
+        actEl.textContent = isPast ? 'Day complete' : campDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        timeEl.textContent = '';
+      } else if (currentBlock) {
+        actEl.textContent = currentBlock.querySelector('.block-name').textContent;
+        timeEl.textContent = currentBlock.querySelector('.block-time').textContent;
+      } else if (nowMins < toMinutes(blocks[0]?.dataset.start || '00:00')) {
+        actEl.textContent = 'Day not started yet';
+        timeEl.textContent = '';
+      } else {
+        actEl.textContent = 'Day complete';
+        timeEl.textContent = '';
+      }
+    });
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  const campDateMap = {
+    '2026-06-22': 'monday',
+    '2026-06-23': 'tuesday',
+    '2026-06-24': 'wednesday',
+    '2026-06-25': 'thursday',
+    '2026-06-26': 'friday'
+  };
+  const today = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const todayKey = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  const matchDay = campDateMap[todayKey];
+  if (matchDay) {
+    tabs.forEach(t => t.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+    const matchTab = document.querySelector(`.tab[data-day="${matchDay}"]`);
+    if (matchTab) {
+      matchTab.classList.add('active');
+      document.getElementById(matchDay).classList.add('active');
+    }
+  }
+})();
+</script>
+</body>
+</html>
